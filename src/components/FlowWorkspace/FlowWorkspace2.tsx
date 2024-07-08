@@ -134,30 +134,30 @@ const FlowWorkspace2 = () => {
         );
       }
     } else {
-      (flowWrapper.current as any).removeEventListener(
+      (flowWrapper.current as any)?.removeEventListener(
         "mousemove",
         handleMouseMove
       );
-      (flowWrapper.current as any).removeEventListener(
+      (flowWrapper.current as any)?.removeEventListener(
         "mousedown",
         handleMouseDown
       );
-      (flowWrapper.current as any).removeEventListener(
+      (flowWrapper.current as any)?.removeEventListener(
         "mouseenter",
         handleMouseEnter
       );
-      (flowWrapper.current as any).removeEventListener(
+      (flowWrapper.current as any)?.removeEventListener(
         "mouseleave",
         handleMouseLeave
       );
     }
 
     return () => {
-      (flowWrapper.current as any).removeEventListener(
+      (flowWrapper.current as any)?.removeEventListener(
         "mousemove",
         handleMouseMove
       );
-      (flowWrapper.current as any).removeEventListener(
+      (flowWrapper.current as any)?.removeEventListener(
         "mousedown",
         handleMouseDown
       );
