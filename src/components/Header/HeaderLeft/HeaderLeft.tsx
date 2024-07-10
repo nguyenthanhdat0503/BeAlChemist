@@ -10,6 +10,8 @@ import {
 import { Button, Dropdown, MenuProps } from "antd";
 import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
+import { startSavingFlow } from "../../../features/flow-controls/flow-controls.slice";
+import { useDispatch } from "react-redux";
 
 export default function HeaderLeft() {
   const location = useLocation();
@@ -17,6 +19,12 @@ export default function HeaderLeft() {
     () => location.pathname.includes("/errorTab"),
     [location.pathname]
   );
+
+  const dispatch = useDispatch();
+
+  const onSave = () => {
+    dispatch(startSavingFlow());
+  };
 
   const items: MenuProps["items"] = [
     {
@@ -44,7 +52,7 @@ export default function HeaderLeft() {
         BeAlChemist
       </p>
       <div className="flex items-center gap-2">
-        <Button icon={<SaveOutlined />}>Save</Button>
+        <Button icon={<SaveOutlined />} onClick={onSave}>Save</Button>
         <Button icon={<FolderAddOutlined />}>New Model</Button>
         <Button icon={<PlusSquareOutlined />}>Clone Workspace</Button>
         <Button icon={<PlusSquareOutlined />}>Clone Model</Button>

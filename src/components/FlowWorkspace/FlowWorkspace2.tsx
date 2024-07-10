@@ -9,35 +9,48 @@ import ReactFlow, {
   BackgroundVariant,
   Controls,
   Edge,
+  EdgeChange,
+  MarkerType,
   MiniMap,
   Node,
-  NodeMouseHandler,
   ReactFlowProvider,
   useEdgesState,
   useNodesState,
   useReactFlow,
 } from "reactflow";
-import { RootState } from "../../store";
+import { v4 as uuidv4 } from "uuid";
+import { NODE_TYPES } from "../../constants/node.types";
 import {
   endAddingNode,
   endSavingFlow,
 } from "../../features/flow-controls/flow-controls.slice";
+import { RootState } from "../../store";
+import GeneralNode from "../Nodes/GeneralNode/GeneralNode";
+import OCRDetectionNode from "../Nodes/OCRDetectionNode/OCRDetectionNode";
 import "./index.css";
+import AbsolutePointNode from "../Nodes/AbsolutePointNode/AbsolutePointNode";
+import FeatureDetectionNode from "../Nodes/FeatureDetectionNode/FeatureDetectionNode";
+import DynamicObjectDetectionNode from "../Nodes/DynamicObjectDetectionNode/DynamicObjectDetectionNode";
+import LoopNode from "../Nodes/LoopNode/LoopNode";
+import CompleteSequenceNode from "../Nodes/CompleteSequenceNode/CompleteSequenceNode";
+import StopProductionNode from "../Nodes/StopProductionNode/StopProductionNode";
 
 const initialNodes: Node[] = JSON.parse(localStorage.getItem("nodes") || "[]");
-
-// const initialEdges: Edge[] = [{ id: "e1-2", source: "1", target: "2" }];
 const initialEdges: Edge[] = JSON.parse(localStorage.getItem("edges") || "[]");
 
-const getMaxId = (nodes: Node[]) => {
-  return nodes.reduce((maxId, node) => {
-    const id = parseInt(node.id, 0);
-    return id > maxId ? id : maxId;
-  }, 0);
+const nodeTypes = {
+  GENERAL: GeneralNode,
+  OCR_DETECTION: OCRDetectionNode,
+  FEATURE_DETECTION: FeatureDetectionNode,
+  DYNAMIC_OBJECT_DETECTION: DynamicObjectDetectionNode,
+  LOOP: LoopNode,
+  ABSOLUTE_POINT: AbsolutePointNode,
+  COMPLETE_SEQUENCE: CompleteSequenceNode,
+  STOP_PRODUCTION: StopProductionNode,
 };
 
 const FlowWorkspace2 = () => {
-  const { isAddingNode, isSavingFlow } = useSelector(
+  const { addingNode, isSavingFlow } = useSelector(
     (state: RootState) => state.flowControls
   );
 
@@ -51,7 +64,24 @@ const FlowWorkspace2 = () => {
   const flowWrapper = useRef(null);
   const [isMouseInFlow, setIsMouseInFlow] = useState(false);
   const onConnect = useCallback(
-    (params: any) => setEdges((eds) => addEdge(params, eds)),
+    (params: any) =>
+      setEdges((eds) =>
+        addEdge(
+          {
+            ...params,
+            // animated: true,
+            style: {
+              strokeWidth: 3,
+            },
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              width: 16,
+              height: 16,
+            },
+          },
+          eds
+        )
+      ),
     [setEdges]
   );
 
@@ -72,7 +102,7 @@ const FlowWorkspace2 = () => {
   };
 
   const handleMouseMove = (event: any) => {
-    if (isAddingNode) {
+    if (addingNode.isAdding) {
       const { clientX, clientY } = event;
       const nodeWidth = newNodeRef.current
         ? (newNodeRef.current as any).offsetWidth
@@ -90,7 +120,7 @@ const FlowWorkspace2 = () => {
   };
 
   const handleMouseDown = (event: any) => {
-    if (isAddingNode) {
+    if (addingNode.isAdding && addingNode.nodeType !== "IDLE") {
       const { clientX, clientY } = event;
       const nodeWidth = newNodeRef.current
         ? (newNodeRef.current as any).offsetWidth
@@ -100,11 +130,10 @@ const FlowWorkspace2 = () => {
         : 0;
       const newX = clientX - nodeWidth / 2;
       const newY = clientY - nodeHeight / 2;
-
-      const newId = getMaxId(nodes) + 1;
       const newNode = {
-        id: `${newId}`,
-        data: { label: `Node ${newId}` },
+        id: uuidv4(),
+        type: addingNode.nodeType,
+        data: { label: `${addingNode.nodeType}`, imgURL: "" },
         position: screenToFlowPosition({ x: newX, y: newY }),
       };
       setNodes((els) => [...els, newNode]);
@@ -114,7 +143,7 @@ const FlowWorkspace2 = () => {
 
   useEffect(() => {
     if (!flowWrapper.current) return;
-    if (isAddingNode) {
+    if (addingNode.isAdding) {
       (flowWrapper.current as any).addEventListener(
         "mousemove",
         handleMouseMove
@@ -161,8 +190,16 @@ const FlowWorkspace2 = () => {
         "mousedown",
         handleMouseDown
       );
+      (flowWrapper.current as any)?.removeEventListener(
+        "mousemove",
+        handleMouseMove
+      );
+      (flowWrapper.current as any)?.removeEventListener(
+        "mousedown",
+        handleMouseDown
+      );
     };
-  }, [isAddingNode]);
+  }, [addingNode]);
 
   const handleContextMenu = (event: any) => {
     event.preventDefault();
@@ -182,37 +219,37 @@ const FlowWorkspace2 = () => {
     };
   }, []);
 
-  const nodeColor = (node: any) => {
-    switch (node.type) {
-      case "input":
-        return "#6ede87";
-      case "output":
-        return "#6865A5";
-      default:
-        return "#ff0072";
-    }
-  };
-
-  const onNodeDoubleClick: NodeMouseHandler = (event, node) => {
-    console.log("onNodeDoubleClick", node);
-  };
-
   return (
     <div className="w-full h-full border" ref={flowWrapper}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        onEdgesChange={(edges: EdgeChange[]) => {
+          console.log({ edges });
+          onEdgesChange(edges);
+        }}
         onMouseDown={handleMouseDown}
         onConnect={onConnect}
-        onNodeDoubleClick={onNodeDoubleClick}
+        nodeTypes={nodeTypes}
+        onNodeClick={(event: React.MouseEvent, node: Node) => {
+          console.log("onNodeClick", event, node);
+        }}
       >
         <Controls />
-        <MiniMap zoomable pannable nodeColor={nodeColor} />
+        <MiniMap
+          zoomable
+          pannable
+          nodeColor={(node: Node) => {
+            const DEFAULT_BACKGROUND = "#fff";
+            return node.type
+              ? getNodeBackground(node.type)
+              : DEFAULT_BACKGROUND;
+          }}
+        />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
-      {isAddingNode && (
+      {addingNode.isAdding && (
         <div
           ref={newNodeRef}
           style={{
@@ -245,3 +282,11 @@ const FlowWorkspaceWrapper2 = () => (
 );
 
 export { FlowWorkspaceWrapper2 };
+
+export const getNodeBackground = (nodeType: string): string => {
+  const nodeTypeEntry = Object.values(NODE_TYPES).find(
+    (node) => node.TYPE === nodeType
+  );
+  const DEFAULT_BACKGROUND = "#fff";
+  return nodeTypeEntry ? nodeTypeEntry.BACKGROUND : DEFAULT_BACKGROUND;
+};

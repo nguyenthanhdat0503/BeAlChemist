@@ -3,15 +3,20 @@ import { createSlice } from "@reduxjs/toolkit";
 export const flowControlsSlice = createSlice({
   name: "flowControls",
   initialState: {
-    isAddingNode: false,
+    addingNode: {
+      isAdding: false,
+      nodeType: "IDLE",
+    },
     isSavingFlow: false,
   },
   reducers: {
-    startAddingNode: (state) => {
-      state.isAddingNode = true;
+    startAddingNode: (state, data) => {
+      state.addingNode.isAdding = true;
+      state.addingNode.nodeType = data.payload;
     },
     endAddingNode: (state) => {
-      state.isAddingNode = false;
+      state.addingNode.isAdding = false;
+      state.addingNode.nodeType = "IDLE";
     },
     startSavingFlow: (state) => {
       state.isSavingFlow = true;
