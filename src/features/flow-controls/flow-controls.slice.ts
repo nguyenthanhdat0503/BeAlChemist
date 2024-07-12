@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export const flowControlsSlice = createSlice({
   name: "flowControls",
@@ -8,6 +8,11 @@ export const flowControlsSlice = createSlice({
       nodeType: "IDLE",
     },
     isSavingFlow: false,
+    isSavingErrors: false,
+    screenSize: {
+      width: 0,
+      height: 0,
+    },
   },
   reducers: {
     startAddingNode: (state, data) => {
@@ -24,6 +29,21 @@ export const flowControlsSlice = createSlice({
     endSavingFlow: (state) => {
       state.isSavingFlow = false;
     },
+    startSavingErrors: (state) => {
+      state.isSavingErrors = true;
+    },
+    endSavingErrors: (state) => {
+      state.isSavingErrors = false;
+    },
+    setScreenSize: (
+      state,
+      data: PayloadAction<{ width: number; height: number }>
+    ) => {
+      state.screenSize = {
+        width: data.payload.width,
+        height: data.payload.height,
+      };
+    },
   },
 });
 
@@ -32,6 +52,9 @@ export const {
   endAddingNode,
   startSavingFlow,
   endSavingFlow,
+  startSavingErrors,
+  endSavingErrors,
+  setScreenSize,
 } = flowControlsSlice.actions;
 
 export const flowControlsReducer = flowControlsSlice.reducer;
