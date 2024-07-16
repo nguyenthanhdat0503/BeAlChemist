@@ -1,5 +1,5 @@
-import { Input, Select } from "antd";
-import { useState } from "react";
+import { Input, InputRef, Select } from "antd";
+import { useEffect, useRef, useState } from "react";
 type ActionType = "MOUSE_ACTION" | "KEYBOARD_ACTION" | "INPUT_TEXT";
 
 function MouseAction() {
@@ -21,8 +21,19 @@ function MouseAction() {
 }
 
 function KeyboardAction() {
+  const [inputValue, setInputValue] = useState("");
+
   return (
-    <Input placeholder="Press a keyboard" size="large" className="w-4/5" />
+    <Input
+      value={inputValue}
+      placeholder="Press a keyboard"
+      size="large"
+      className="w-4/5"
+      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+        setInputValue(e.code);
+        e.preventDefault();
+      }}
+    />
   );
 }
 

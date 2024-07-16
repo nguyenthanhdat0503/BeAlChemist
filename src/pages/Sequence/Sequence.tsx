@@ -3,12 +3,12 @@ import DisplayImage from "../../components/DisplayImage/DisplayImage";
 import { FlowWorkspaceWrapper2 } from "../../components/FlowWorkspace/FlowWorkspace2";
 import NodeSidebar from "../../components/NodeSidebar/NodeSidebar";
 import ActionSelector from "./ActionSelector";
+import DynamicObjectDetection from "./DynamicObjectDetection";
+import FeatureDetectionSelector from "./FeatureDetectionSelector";
+import OCRDetection from "./OCRDetection";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
 import { useMemo } from "react";
-import FeatureDetectionSelector from "./FeatureDetectionSelector";
-import OCRDetection from "./OCRDetection";
-import DynamicObjectDetection from "./DynamicObjectDetection";
 
 export default function Sequence() {
   const screenSize = useSelector(
@@ -19,7 +19,9 @@ export default function Sequence() {
     if (screenSize.height === 0 || screenSize.width === 0) return 0;
     return screenSize.height - HEADER_HEIGHT;
   }, [screenSize]);
+
   if (screenSize.height === 0 || screenSize.width === 0) return null;
+
   return (
     <div className="h-full grid grid-cols-12 gap-0">
       <div className="col-span-7 h-full flex">
@@ -33,7 +35,7 @@ export default function Sequence() {
       <div className="col-span-5 h-full flex flex-col shadow-xl">
         <div
           style={{
-            height: 500,
+            height: 400,
           }}
         >
           <DisplayImage />
@@ -44,7 +46,7 @@ export default function Sequence() {
         <div
           className="w-full overflow-y-auto py-8 px-3"
           style={{
-            height: containerHeight - 500 - 40,
+            height: containerHeight - 400 - 40,
           }}
         >
           <div className="mt-2 flex flex-col gap-3">
