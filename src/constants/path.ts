@@ -1,8 +1,11 @@
-const path = {
+export const path = {
   home: "/",
   login: "/login",
   register: "/register",
   logout: "/logout",
 };
 
-export default path
+export const config = {
+  baseUrl: "",
+  maxSizeImageUpload: 1000000,
+};

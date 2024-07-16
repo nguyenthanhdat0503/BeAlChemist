@@ -2,10 +2,12 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { flowControlsReducer } from "./features/flow-controls/flow-controls.slice";
 import logger from "redux-logger";
+import { authReducer } from "./features/auth.slice";
 
 const store = configureStore({
   reducer: {
     flowControls: flowControlsReducer,
+    auth: authReducer,
   },
   devTools: true, // enable Redux DevTools
   middleware: (getDefaultMiddleware: any) =>
