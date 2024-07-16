@@ -16,6 +16,7 @@ const store = configureStore({
 
 const rootReducer = combineReducers({
   flowControls: flowControlsReducer,
+  auth: authReducer,
 });
 
 export default store;
